@@ -75,3 +75,8 @@ def listFeedback():
     with open("templates/partials/success_feedback.html", "w") as f:
         for row in data:
             f.write("<p>\n")
+
+        # Escape feedback to prevent XSS attacks
+        safe_feedback = html.escape(row[1])
+        f.write(f"{safe_feedback}\n")
+        f.write("</p>\n")
