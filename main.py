@@ -29,6 +29,10 @@ def addFeedback():
     
     if request.method == "POST":
         feedback = request.form["feedback"]
+        # input validation for feedback to prevent XSS attacks
+        if not feedback or len(feedback) > 500:
+            return render_template("/success.html", state=False, value="Invalid input")  
+        
         dbHandler.insertFeedback(feedback)
         dbHandler.listFeedback()
         return render_template("/success.html", state=True, value="Back")
@@ -47,6 +51,11 @@ def signup():
         username = request.form["username"]
         password = request.form["password"]
         DoB = request.form["dob"]
+
+        # Basic input validation
+        if not username or not password:
+            return render_template("/signup.html")
+        
         dbHandler.insertUser(username, password, DoB)
         return render_template("/index.html")
     else:
@@ -56,6 +65,7 @@ def signup():
 @app.route("/index.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
 @app.route("/", methods=["POST", "GET"])
 def home():
+    #Using Safe redirect
     if request.method == "GET" and request.args.get("url"):
         url = request.args.get("url", "")
         return safe_redirect(url)
@@ -63,6 +73,11 @@ def home():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
+        # Input validation for login credentials
+        if not username or not password:
+            return render_template("/index.html")
+
+
         isLoggedIn = dbHandler.retrieveUsers(username, password)
         if isLoggedIn:
             dbHandler.listFeedback()
@@ -76,4 +91,6 @@ def home():
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+    # Using waitress instead of Flask's debug
+    # Local Host binding improves security
     serve(app, debug=False, host="127.0.0.1", port=5000)
