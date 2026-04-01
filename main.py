@@ -10,6 +10,13 @@ import user_management as dbHandler
 
 app = Flask(__name__)
 
+ALLOWED_URLS = ["/", "/index.html", "/signup.html", "/success.html"]
+
+def safe_redirect(url):
+    if url in ALLOWED_URLS:
+        return redirect(url)
+    return redirect("/")
+
 
 @app.route("/success.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
 def addFeedback():
