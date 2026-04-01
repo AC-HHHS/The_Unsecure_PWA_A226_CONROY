@@ -1,14 +1,20 @@
 import sqlite3 as sql
 import time
-import random
 import secrets
+import html
+
+from werkzeug.security import generate_password_hash, check_password_hash
 
 def insertUser(username, password, DoB):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
+
+    #Hash password before storing it in the database to improve security
+    hashed_password = generate_password_hash(password)
+
     cur.execute(
         "INSERT INTO users (username,password,dateOfBirth) VALUES (?,?,?)",
-        (username, password, DoB),
+        (username, hashed_password, DoB),
     )
     con.commit()
     con.close()
@@ -18,9 +24,16 @@ def retrieveUsers(username, password):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
     cur.execute("SELECT * FROM users WHERE username = ?", (username,))
-    if cur.fetchone() == None:
+    result = cur.fetchone()
+    
+    if result is None:
         con.close()
         return False
+    stored_password = result[0]
+    if not check_password_hash(stored_password, password):
+        con.close()
+        return False    
+
     else:
         cur.execute(f"SELECT * FROM users WHERE password = ?", (password,))
         # Plain text log of visitor count as requested by Unsecure PWA management
@@ -42,7 +55,7 @@ def retrieveUsers(username, password):
 def insertFeedback(feedback):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
-    cur.execute(f"INSERT INTO feedback (feedback) VALUES (?)", (feedback,))
+    cur.execute("INSERT INTO feedback (feedback) VALUES (?)", (feedback,))
     con.commit()
     con.close()
 
