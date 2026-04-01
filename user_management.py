@@ -1,7 +1,7 @@
 import sqlite3 as sql
 import time
 import random
-
+import secrets
 
 def insertUser(username, password, DoB):
     con = sql.connect("database_files/database.db")
@@ -30,7 +30,7 @@ def retrieveUsers(username, password):
         with open("visitor_log.txt", "w") as file:
             file.write(str(number))
         # Simulate response time of heavy app for testing purposes
-        time.sleep(random.randint(80, 90) / 1000)
+        time.sleep(secrets.randbelow(11) / 1000 + 0.08)
         if cur.fetchone() == None:
             con.close()
             return False
