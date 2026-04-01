@@ -10,19 +10,23 @@ import user_management as dbHandler
 
 app = Flask(__name__)
 
+# List of allowed URLs for redirection to prevent open redirect vulnerabilities
 ALLOWED_URLS = ["/", "/index.html", "/signup.html", "/success.html"]
 
 def safe_redirect(url):
     if url in ALLOWED_URLS:
         return redirect(url)
-    return redirect("/")
+    else:
+        return redirect("/")
 
 
 @app.route("/success.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
 def addFeedback():
+    #Validate redirect URL
     if request.method == "GET" and request.args.get("url"):
         url = request.args.get("url", "")
-        return redirect(url, code=302)
+        return safe_redirect(url)
+    
     if request.method == "POST":
         feedback = request.form["feedback"]
         dbHandler.insertFeedback(feedback)
@@ -37,7 +41,8 @@ def addFeedback():
 def signup():
     if request.method == "GET" and request.args.get("url"):
         url = request.args.get("url", "")
-        return redirect(url, code=302)
+        return safe_redirect(url)
+    
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -53,7 +58,8 @@ def signup():
 def home():
     if request.method == "GET" and request.args.get("url"):
         url = request.args.get("url", "")
-        return redirect(url, code=302)
+        return safe_redirect(url)
+    
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
